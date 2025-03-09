@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Scarface",
+    "img": "https://m.media-amazon.com/images/I/61BZARmFJFL.__AC_SX300_SY300_QL70_FMwebp_.jpg",
+    "price": 500,
+    "description": "Manufactured by Microsoft ",
+    "id": 1
+  },
+  {
+    "name": "Pear",
+    "img": "https://www.thehopsack.ie/wp-content/uploads/2024/08/pear.jpg",
+    "price": 1,
+    "description": "Pear ",
+    "id": 2
+  },
+  {
+    "name": "Luxury Chessboard",
+    "img": "https://m.media-amazon.com/images/I/719Ed9W+OvL._AC_SY300_SX300_.jpg",
+    "price": 290,
+    "description": "Wooden Chess Set with Metal Chess Pieces",
+    "id": 3
+  }
+]

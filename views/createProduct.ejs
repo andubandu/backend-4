@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Product</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-3xl font-bold text-center mb-8">Create Product</h1>
+        <form id="createForm" class="space-y-4">
+            <input id="createName" class="w-full p-2 border rounded" placeholder="Name" required>
+            <input id="createImg" class="w-full p-2 border rounded" placeholder="Image URL" required>
+            <input id="createPrice" type="number" class="w-full p-2 border rounded" placeholder="Price" step="0.01" required>
+            <textarea id="createDescription" class="w-full p-2 border rounded" placeholder="Description" required></textarea>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-blue-500 text-white p-2 rounded">Create</button>
+                <a href="/" class="flex-1 bg-gray-200 p-2 rounded text-center">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        async function submitProduct(data) {
+            try {
+                const res = await fetch(`${window.location.origin}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    location.href = '/'; 
+                }
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+
+        document.getElementById('createForm').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('createName').value,
+                img: document.getElementById('createImg').value,
+                price: +document.getElementById('createPrice').value, 
+                description: document.getElementById('createDescription').value
+            };
+
+            submitProduct(data);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <form id="editForm" class="bg-white p-6 rounded-lg max-w-md w-full mx-4 space-y-4">
+            <input type="hidden" id="editProductId">
+            <input type="text" id="editName" class="w-full p-2 border rounded" placeholder="Name">
+            <input type="text" id="editImg" class="w-full p-2 border rounded" placeholder="Image URL">
+            <input type="number" id="editPrice" class="w-full p-2 border rounded" placeholder="Price" step="0.01">
+            <textarea id="editDescription" class="w-full p-2 border rounded" placeholder="Description"></textarea>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-blue-500 text-white p-2 rounded">Save</button>
+                <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-200 p-2 rounded">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4 space-y-4">
+            <p class="text-center text-lg">Delete Product?</p>
+            <div class="flex gap-2">
+                <button id="confirmDelete" class="flex-1 bg-red-500 text-white p-2 rounded">Delete</button>
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 bg-gray-200 p-2 rounded">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="text-3xl font-bold text-center mb-8">Product Details</h1>
+    <div id="productDetail" class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    </div>
+
+    <script>
+        const productDetail = document.getElementById('productDetail');
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+        const deleteModal = document.getElementById('deleteModal');
+        let deleteProductId = null;
+
+        const showEditModal = item => {
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editImg').value = item.img;
+            document.getElementById('editPrice').value = item.price;
+            document.getElementById('editDescription').value = item.description;
+            document.getElementById('editProductId').value = item.id;
+            editModal.classList.replace('hidden', 'flex');
+        };
+
+        const closeEditModal = () => editModal.classList.replace('flex', 'hidden');
+
+        const showDeleteModal = id => {
+            deleteProductId = id;
+            deleteModal.classList.replace('hidden', 'flex');
+        };
+
+        const closeDeleteModal = () => {
+            deleteProductId = null;
+            deleteModal.classList.replace('flex', 'hidden');
+        };
+
+        document.getElementById('confirmDelete').onclick = async () => {
+            if (deleteProductId !== null) {
+                try {
+                    const res = await deleteRequest(deleteProductId);
+                    if (res.ok) {
+                        closeDeleteModal();
+                        window.location.href = '/';
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        };
+
+        const editRequest = async (id, data) => {
+            return fetch(`${window.location.origin}/products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        };
+
+        const deleteRequest = async (id) => {
+            return fetch(`${window.location.origin}/products/${id}`, {
+                method: 'DELETE'
+            });
+        };
+
+        editForm.onsubmit = async e => {
+            e.preventDefault();
+            const id = document.getElementById('editProductId').value;
+            const data = {
+                name: document.getElementById('editName').value,
+                img: document.getElementById('editImg').value,
+                price: parseFloat(document.getElementById('editPrice').value),
+                description: document.getElementById('editDescription').value
+            };
+
+            try {
+                const res = await editRequest(id, data);
+                if (res.ok) {
+                    closeEditModal();
+                    getProductDetail(id);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        const getProductDetail = async id => {
+            try {
+                const res = await fetch(`${window.location.origin}/products/${id}`);
+                const item = await res.json();
+                productDetail.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}" class="w-full h-96 object-cover rounded mb-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-2xl font-semibold">${item.name}</h3>
+                        <div class="flex gap-2">
+                            <button onclick='showEditModal(${JSON.stringify(item)})' class="text-blue-500">✏️</button>
+                            <button onclick='showDeleteModal(${item.id})' class="text-red-500">🗑️</button>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-blue-500 mb-6">$${item.price.toFixed(2)}</p>
+                    <p class="text-lg text-gray-700 mb-4">${item.description}</p>
+                    <a href="/" class="block bg-blue-500 text-white text-center p-2 rounded hover:bg-blue-600">
+                        Back to Products
+                    </a>
+                `;
+            } catch (err) {
+                productDetail.innerHTML = '<p class="text-red-500 text-center">Failed to load product details</p>';
+                console.error(err);
+            }
+        };
+
+        const productId = window.location.pathname.split('/').pop();
+        if (productId) getProductDetail(productId);
+    </script>
+</body>
+</html>
